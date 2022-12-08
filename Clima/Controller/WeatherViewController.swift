@@ -20,13 +20,40 @@ class WeatherViewController: UIViewController {
     // Экземпляр структуры с API погоды
     var weatherManager = WeatherManager()
     
+    var locationManager = CLLocationManager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         weatherManager.delegate = self
         searchTextField.delegate = self
+        
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
     }
     
+    
+    @IBAction func locationPressed(_ sender: UIButton) {
+        locationManager.requestLocation()
+    }
+    
+}
+
+//MARK: - CLLocationManagerDelegate
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            locationManager.stopUpdatingLocation()
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            weatherManager.fetchWather(latitude: lat, longitude: lon)
+        }
+    }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
 }
 
 //MARK: - UITextFieldDelegate
@@ -81,3 +108,4 @@ extension WeatherViewController: WeatherManagerDelegate {
         print(error)
     }
 }
+
